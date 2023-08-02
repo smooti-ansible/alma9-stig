@@ -1,0 +1,47 @@
+- hosts: all
+  become: true
+  vars:
+    - grub_admin_username: solaire
+  tasks:
+    - name: Configure SSH Client to Use FIPS 140-2 Validated Ciphers - openssh.config
+      lineinfile:
+        path: /etc/crypto-policies/back-ends/openssh.config
+        regexp: '^Ciphers'
+        line: Ciphers aes256-ctr,aes192-ctr,aes128-ctr
+
+
+    - name: Support session locking with tmux
+      copy:
+        src: files/tmux.sh
+        dest: /etc/profile.d/
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Prevent user from disabling the screen lock
+      lineinfile:
+        path: /etc/shells
+        regexp: '^.*tmux'
+        state: absent
+
+    - name: Configure Multiple DNS Servers in /etc/resolv.conf
+      copy:
+        src: files/resolv.conf
+        dest: /etc/resolv.conf
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Update grub superuser
+      block:
+
+      - name: Set the UEFI Boot Loader Admin Username to a Non-Default Value
+        lineinfile:
+          path: /etc/grub.d/01_users
+          regexp: '^    set superusers='
+          line: '    set superusers="{{ grub_admin_username }}"'
+        register: grub_superuser
+
+      - name: Update grub.cfg
+        command: grub2-mkconfig -o /etc/grub2.cfg
+        when: grub_superuser.changed == true

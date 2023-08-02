@@ -1,0 +1,1 @@
+{"dependencies":[["vagrant-reload",["= 0.0.1"]],["rake",[">= 0"]],["virtualbox_WSL2",["= 0.1.3"]]],"checksum":"27ee7b24d22266bf90e7d9c197986f962d987120f4632b5f524c3e6d4eb094e4","vagrant_version":"2.3.4"}
